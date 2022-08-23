@@ -1,0 +1,21 @@
+name: 'Setup premake'
+description: 'Downloads and executes Premake'
+inputs:
+  version:
+    description: 'Premake version to download. Defaults to latest release.'
+    required: false
+    default: '5.0.0-beta1' # PREMAKE_LATEST DO NOT REMOVE COMMENT
+  action:
+    description: 'Action to execute'
+    required: true
+  options:
+    description: 'Additional Premake options'
+    required: false
+    default: ''
+  args:
+    description: 'Additional Premake arguments'
+    required: false
+    default: ''
+runs:
+  using: 'node16'
+  main: 'dist/index.js'

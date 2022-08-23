@@ -1,0 +1,35 @@
+name: update-premake-version
+on:
+  schedule:
+    - cron: "0 0 * * 1"
+jobs:
+  update_premake_latest:
+    runs-on: ubuntu-latest
+
+    name: A scheduled job to update the default Premake version to the latest
+
+    steps:
+      - name: Checkout Premake
+        uses: actions/checkout@v3
+        with:
+          repository: premake/premake-core
+      - name: Check latest version tag
+        id: version-tag
+        run: |
+          git fetch --tags
+          echo "VERSION=$(git for-each-ref --sort=taggerdate --format '%(tag)' | tail -1 | cut -c 2-)" >> $GITHUB_ENV
+      - name: Print
+        run: echo ${{ env.VERSION }}
+      - name: Checkout current repo
+        uses: actions/checkout@v3
+      - name: Try to update version in action.yml
+        run: |
+          sed -i "s/.*PREMAKE_LATEST.*/    default\: '${{ env.VERSION }}' \# PREMAKE_LATEST DO NOT REMOVE COMMENT/g" action.yml
+      - name: Try to update version in README.md
+        run: |
+          sed -i "s/latest release:.*/latest release: \`${{ env.VERSION }}\`./g" README.md
+      - name: Commit update if applied
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "AUTO: Updating default Premake version to new release"
+

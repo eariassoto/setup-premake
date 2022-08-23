@@ -1,0 +1,41 @@
+name: tests
+on:
+  push:
+  pull_request:
+
+jobs:
+  setup_premake_test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+
+    name: A job to test the setup-premake action
+
+    env:
+      PREMAKE_VERSION: 5.0.0-beta1
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Create a fake premake5.lua file # A real project should have its own
+        run: touch premake5.lua
+      - name: Run Premake
+        uses: ./ # Uses an action in the root directory
+        id: setup-premake
+        with:
+          version: ${{ env.PREMAKE_VERSION }} 
+          action: 'gmake'
+        continue-on-error: false
+      - name: Print Premake version
+        id: print_version
+        run: ./.premake/premake5 --version | grep -q "${{ env.PREMAKE_VERSION }}"
+        continue-on-error: true
+      - name: Check on failures
+        if: steps.print_version.outcome != 'success'
+        run: |
+          echo "Downloaded Premake version do not match with input version."
+          echo "Desired version: ${{ env.PREMAKE_VERSION }}"
+          echo "Got: $(./.premake/premake5 --version)"
+          exit 1
+        
