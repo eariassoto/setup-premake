@@ -1,4 +1,4 @@
-name: 'Setup premake'
+name: 'Setup Premake Action'
 description: 'Downloads and executes Premake'
 inputs:
   version:
